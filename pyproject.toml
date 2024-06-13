@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "pythonweb-hw13"
+version = "0.1.0"
+description = ""
+authors = ["basilegupov <basilegupov@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.111.0"
+alembic = "^1.13.1"
+sqlalchemy = "^2.0.30"
+asyncpg = "^0.29.0"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+psycopg2 = "^2.9.9"
+loguru = "^0.7.2"
+faker = "^25.2.0"
+libgravatar = "^1.0.4"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.9"
+fastapi-mail = "^1.4.1"
+python-dotenv = "^1.0.1"
+redis = "^5.0.5"
+cloudinary = "^1.40.0"
+fastapi-limiter = "^0.1.6"
+jinja2 = "^3.1.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
