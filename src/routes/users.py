@@ -1,14 +1,20 @@
+"""
+Users routes module.
+
+This module defines the endpoints for managing user-related operations.
+
+Routes:
+    - /users/me: Endpoint for retrieving the current user's details.
+    - /users/avatar: Endpoint for updating the user's avatar.
+"""
+
 import pickle
 
 import cloudinary
 import cloudinary.uploader
 from fastapi import (
     APIRouter,
-    HTTPException,
     Depends,
-    status,
-    Path,
-    Query,
     UploadFile,
     File,
 )
@@ -38,7 +44,23 @@ cloudinary.config(
     dependencies=[Depends(RateLimiter(times=1, seconds=20))],
 )
 async def get_current_user(user: User = Depends(auth_service.get_current_user)):
-    return user
+    """
+    Endpoint for retrieving the current user's details.
+
+    Args:
+        user (User): The current authenticated user.
+
+    Returns:
+        UserResponse: The current user's details.
+    """
+    return UserResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        avatar=user.avatar,
+        detail="User successfully created"
+    )
+    # return user
 
 
 @router.patch(
@@ -51,13 +73,32 @@ async def get_current_user(
         user: User = Depends(auth_service.get_current_user),
         db: AsyncSession = Depends(get_db),
 ):
+    """
+    Endpoint for updating the user's avatar.
+
+    Args:
+        file (UploadFile): The image file for the new avatar.
+        user (User): The current authenticated user.
+        db (AsyncSession): The asynchronous database session.
+
+    Returns:
+        UserResponse: The updated user details with the new avatar.
+    """
     public_id = f"Web21/{user.email}"
     res = cloudinary.uploader.upload(file.file, public_id=public_id, owerite=True)
     print(res)
     res_url = cloudinary.CloudinaryImage(public_id).build_url(
         width=250, height=250, crop="fill", version=res.get("version")
     )
-    user = await repositories_users.update_avatar_url(user.email, res_url, db)
+    updated_user = await repositories_users.update_avatar_url(user.email, res_url, db)
     auth_service.cache.set(user.email, pickle.dumps(user))
     auth_service.cache.expire(user.email, 300)
-    return user
+
+    return UserResponse(
+        id=updated_user.id,
+        username=updated_user.username,
+        email=updated_user.email,
+        avatar=updated_user.avatar,
+        detail="User successfully created"
+    )
+    # return user

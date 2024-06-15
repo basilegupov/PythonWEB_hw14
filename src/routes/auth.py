@@ -1,3 +1,16 @@
+"""
+Authentication routes module.
+
+This module defines the authentication endpoints for user registration, login, token refresh,
+email confirmation, and email request.
+
+Routes:
+    - /auth/signup: Endpoint for user registration.
+    - /auth/login: Endpoint for user login.
+    - /auth/refresh_token: Endpoint for refreshing access tokens.
+    - /auth/confirmed_email/{token}: Endpoint for confirming email addresses.
+    - /auth/request_email: Endpoint for requesting email confirmation.
+"""
 from fastapi import APIRouter, HTTPException, Depends, status, Security, BackgroundTasks, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.responses import FileResponse
@@ -15,6 +28,18 @@ security = HTTPBearer()
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(body: UserSchema, bt: BackgroundTasks, request: Request, db: AsyncSession = Depends(get_db)):
+    """
+    Endpoint for user registration.
+
+    Args:
+        body (UserSchema): The user data to register.
+        bt (BackgroundTasks): Background task to send email confirmation.
+        request (Request): The request object.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing user details and registration confirmation message.
+    """
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
@@ -27,6 +52,16 @@ async def signup(body: UserSchema, bt: BackgroundTasks, request: Request, db: As
 
 @router.post("/login", response_model=TokenSchema)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    """
+    Endpoint for user login.
+
+    Args:
+        body (OAuth2PasswordRequestForm): The login form data.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing access token, refresh token, and token type.
+    """
     user = await repository_users.get_user_by_email(body.username, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
@@ -43,6 +78,16 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
 @router.get('/refresh_token', response_model=TokenSchema)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security),
                         db: AsyncSession = Depends(get_db)):
+    """
+    Endpoint for refreshing access tokens.
+
+    Args:
+        credentials (HTTPAuthorizationCredentials): The authorization credentials containing the refresh token.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing new access token, refresh token, and token type.
+    """
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
     user = await repository_users.get_user_by_email(email, db)
@@ -58,14 +103,14 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(sec
 @router.get('/confirmed_email/{token}')
 async def confirmed_email(token: str, db: AsyncSession = Depends(get_db)):
     """
-    Обработчик маршрута для подтверждения email по токену.
+    Endpoint for confirming email addresses.
+
     Args:
-        token (str): JWT-токен для подтверждения email.
-        db (AsyncSession): Сессия базы данных.
+        token (str): The email confirmation token.
+        db (AsyncSession): The asynchronous database session.
+
     Returns:
-        dict: Сообщение об успешном подтверждении email.
-    Raises:
-        HTTPException: Если произошла ошибка при подтверждении email.
+        dict: A dictionary containing a confirmation message.
     """
     email = await auth_service.get_email_from_token(token)  # Получаем email из токена
     user = await repository_users.get_user_by_email(email, db)  # Получаем пользователя по email из базы данных
@@ -82,14 +127,16 @@ async def confirmed_email(token: str, db: AsyncSession = Depends(get_db)):
 async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, request: Request,
                         db: AsyncSession = Depends(get_db)):
     """
-    Обработчик POST-запроса для запроса подтверждения email.
-    Args:
-        body (RequestEmail): Тело запроса, содержащее email.
-        background_tasks (BackgroundTasks): Фоновые задачи FastAPI.
-        request (Request): Запрос FastAPI.
-        db (AsyncSession): Сессия базы данных.
-    Returns: dict: Сообщение о запросе подтверждения email.
+    Endpoint for requesting email confirmation.
 
+    Args:
+        body (RequestEmail): The email request data.
+        background_tasks (BackgroundTasks): Background task to send email confirmation.
+        request (Request): The request object.
+        db (AsyncSession): The asynchronous database session.
+
+    Returns:
+        dict: A dictionary containing a confirmation message.
     """
     user = await repository_users.get_user_by_email(body.email, db)  # Получаем пользователя по email из базы данных
 
@@ -105,13 +152,15 @@ async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, r
 @router.get('/{username}')
 async def request_email(username: str, response: Response, db: AsyncSession = Depends(get_db)):
     """
-    Обработчик GET-запроса для отслеживания того, что пользователь открыл email.
+    Endpoint for handling email opening tracking.
+
     Args:
-        username (str): Имя пользователя, для которого происходит отслеживание.
-        response (Response): Ответ FastAPI.
-        db (AsyncSession): Сессия базы данных.
+        username (str): The username for tracking.
+        response (Response): The response object.
+        db (AsyncSession): The asynchronous database session.
+
     Returns:
-        FileResponse: Файл изображения для отображения в браузере.
+        FileResponse: The image file response.
     """
     print('--------------------------------')
     print(f'{username} зберігаємо що він відкрив email в БД')
