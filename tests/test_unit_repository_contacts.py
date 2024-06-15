@@ -1,3 +1,5 @@
+# from your_module import get_upcoming_birthdays, Contact, ContactResponse, User  # замените your_module на имя вашего модуля
+from unittest.mock import AsyncMock, patch, MagicMock
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -76,40 +78,43 @@ class TestContactRepository(unittest.IsolatedAsyncioTestCase):
         # Verifying that the contact is deleted
         self.assertEqual(result, self.contact)
 
-    # async def test_get_upcoming_birthdays(self):
-    #     # Mocking the database query result
-    #     today = datetime.now().date()
-    #     contacts = [
-    #         Contact(birthday=today + timedelta(days=i), user_id=self.user.id) for i in range(5)
-    #     ]
-    #     mock_contact = MagicMock()
-    #     mock_contact.return_value.scalars.all.return_value = contacts
-    #     self.session.execute.return_value = mock_contact
-    #
-    #     # Calling the function under test
-    #     result = await get_upcoming_birthdays(self.user, self.session)
-    #     # Verifying that the correct contacts with upcoming birthdays are returned
-    #     expected_contacts = contacts[:7]  # Get contacts with birthdays within the next 7 days
-    #     self.assertEqual(result, expected_contacts)
-    async def test_get_upcoming_birthdays(self):
-        # Mocking the database session
-        session = MagicMock(spec=AsyncSession)
-        # Test parameters
-        user = User(id=1)
-        # Mocking the database query result
-        today = datetime.now().date()
-        contacts = [
-            Contact(birthday=today + timedelta(days=i), user_id=user.id) for i in range(5)
-        ]
-        mock_result = MagicMock()
-        mock_result.scalars = MagicMock(return_value=MagicMock(all=MagicMock(return_value=contacts)))
-        session.execute = AsyncMock(return_value=mock_result)
-        # Calling the function under test
-        result = await get_upcoming_birthdays(user, session)
-        # Verifying that the correct contacts with upcoming birthdays are returned
-        expected_contacts = contacts[:7]  # Get contacts with birthdays within the next 7 days
-        self.assertEqual(result, expected_contacts)
 
+    # @patch('your_module.db.execute')  # Замокать вызов db.execute
+    async def test_get_upcoming_birthdays(self, mock_db_execute):
+        # Создаем фиктивные данные
+        fake_today = datetime(2024, 6, 16).date()
+        fake_birthday_1 = fake_today + \
+            timedelta(days=3)  # День рождения через 3 дня
+        # День рождения через 10 дней
+        fake_birthday_2 = fake_today + timedelta(days=10)
+
+        contact_1 = Contact(
+            id=1, first_name="John", last_name="Doe", email="john@example.com", phone_number="1234567890",
+            birthday=fake_birthday_1, additional_data="", created_at=fake_today, updated_at=fake_today, user=None
+        )
+        contact_2 = Contact(
+            id=2, first_name="Jane", last_name="Doe", email="jane@example.com", phone_number="0987654321",
+            birthday=fake_birthday_2, additional_data="", created_at=fake_today, updated_at=fake_today, user=None
+        )
+
+        mock_db_execute.return_value.scalars().all.return_value = [
+            contact_1, contact_2]
+
+        # Создаем фиктивного пользователя
+        # user = User(id=1, username="testuser", email="testuser@example.com")
+
+        # Вызов тестируемой функции
+        # db = AsyncMock(AsyncSession)
+        result = await get_upcoming_birthdays(self.user, self.session)
+
+        # Проверка результатов
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].first_name, "John")
+        self.assertEqual(result[0].last_name, "Doe")
+        self.assertEqual(result[0].email, "john@example.com")
+
+
+# Запуск тестов
 
 if __name__ == '__main__':
     unittest.main()
