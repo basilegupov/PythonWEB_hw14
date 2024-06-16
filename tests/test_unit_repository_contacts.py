@@ -1,5 +1,5 @@
 # from your_module import get_upcoming_birthdays, Contact, ContactResponse, User  # замените your_module на имя вашего модуля
-from unittest.mock import AsyncMock, patch, MagicMock
+# from unittest.mock import AsyncMock, patch, MagicMock
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,7 +68,6 @@ class TestContactRepository(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.first_name, body.first_name)
 
     async def test_delete_contact(self):
-
         # Mocking the database query result
         mock_contact = MagicMock()
         mock_contact.scalar_one_or_none.return_value = self.contact
@@ -78,13 +77,10 @@ class TestContactRepository(unittest.IsolatedAsyncioTestCase):
         # Verifying that the contact is deleted
         self.assertEqual(result, self.contact)
 
-
-    # @patch('your_module.db.execute')  # Замокать вызов db.execute
-    async def test_get_upcoming_birthdays(self, mock_db_execute):
+    async def test_get_upcoming_birthdays(self):
         # Создаем фиктивные данные
         fake_today = datetime(2024, 6, 16).date()
-        fake_birthday_1 = fake_today + \
-            timedelta(days=3)  # День рождения через 3 дня
+        fake_birthday_1 = fake_today + timedelta(days=3)  # День рождения через 3 дня
         # День рождения через 10 дней
         fake_birthday_2 = fake_today + timedelta(days=10)
 
@@ -97,14 +93,9 @@ class TestContactRepository(unittest.IsolatedAsyncioTestCase):
             birthday=fake_birthday_2, additional_data="", created_at=fake_today, updated_at=fake_today, user=None
         )
 
-        mock_db_execute.return_value.scalars().all.return_value = [
+        self.session.execute.return_value = [
             contact_1, contact_2]
 
-        # Создаем фиктивного пользователя
-        # user = User(id=1, username="testuser", email="testuser@example.com")
-
-        # Вызов тестируемой функции
-        # db = AsyncMock(AsyncSession)
         result = await get_upcoming_birthdays(self.user, self.session)
 
         # Проверка результатов

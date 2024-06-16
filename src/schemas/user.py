@@ -24,8 +24,8 @@ class UserResponse(BaseModel):
     id: int = 1
     username: str
     email: EmailStr
-    avatar: str
-    model_config = ConfigDict(from_attributes = True)
+    avatar: str | None
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TokenSchema(BaseModel):

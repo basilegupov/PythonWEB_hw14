@@ -36,7 +36,7 @@ def test_not_confirmed_login(client):
                            data={"username": user_data.get("email"), "password": user_data.get("password")})
     assert response.status_code == 401, response.text
     data = response.json()
-    assert data["detail"] == "Email not confirmed"
+    assert data["detail"] == messages.EMAIL_NOT_CONFIRMED
 
 
 @pytest.mark.asyncio
@@ -62,7 +62,7 @@ def test_wrong_password_login(client):
                            data={"username": user_data.get("email"), "password": "password"})
     assert response.status_code == 401, response.text
     data = response.json()
-    assert data["detail"] == "Invalid password"
+    assert data["detail"] == messages.INVALID_PASSWORD
 
 
 def test_wrong_email_login(client):
@@ -70,7 +70,7 @@ def test_wrong_email_login(client):
                            data={"username": "email", "password": user_data.get("password")})
     assert response.status_code == 401, response.text
     data = response.json()
-    assert data["detail"] == "Invalid email"
+    assert data["detail"] == messages.INVALID_EMAIL
 
 
 def test_validation_error_login(client):

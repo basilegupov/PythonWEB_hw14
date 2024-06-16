@@ -104,17 +104,27 @@ class Auth:
         user_hash = str(email)
 
         user = self.cache.get(user_hash)
-
         if user is None:
             print("User from database")
             user = await repository_users.get_user_by_email(email, db)
             if user is None:
                 raise credentials_exception
-            await self.cache.set(user_hash, pickle.dumps(user))
-            await self.cache.expire(user_hash, 300)
+            self.cache.set(user_hash, pickle.dumps(user))
+            self.cache.expire(user_hash, 300)
         else:
             print("User from cache")
             user = pickle.loads(user)
+
+        # if user is None:
+        #     print("User from database")
+        #     user = await repository_users.get_user_by_email(email, db)
+        #     if user is None:
+        #         raise credentials_exception
+        #     await self.cache.set(user_hash, pickle.dumps(user))
+        #     await self.cache.expire(user_hash, 300)
+        # else:
+        #     print("User from cache")
+        #     user = pickle.loads(user)
         return user
 
     def create_email_token(self, data: dict):

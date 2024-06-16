@@ -53,14 +53,14 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user)):
     Returns:
         UserResponse: The current user's details.
     """
-    return UserResponse(
-        id=user.id,
-        username=user.username,
-        email=user.email,
-        avatar=user.avatar,
-        detail="User successfully created"
-    )
-    # return user
+    # return UserResponse(
+    #     id=user.id,
+    #     username=user.username,
+    #     email=user.email,
+    #     avatar=user.avatar,
+    #     detail="User successfully created"
+    # )
+    return user
 
 
 @router.patch(
@@ -90,15 +90,15 @@ async def get_current_user(
     res_url = cloudinary.CloudinaryImage(public_id).build_url(
         width=250, height=250, crop="fill", version=res.get("version")
     )
-    updated_user = await repositories_users.update_avatar_url(user.email, res_url, db)
+    user = await repositories_users.update_avatar_url(user.email, res_url, db)
     auth_service.cache.set(user.email, pickle.dumps(user))
     auth_service.cache.expire(user.email, 300)
 
-    return UserResponse(
-        id=updated_user.id,
-        username=updated_user.username,
-        email=updated_user.email,
-        avatar=updated_user.avatar,
-        detail="User successfully created"
-    )
-    # return user
+    # return UserResponse(
+    #     id=updated_user.id,
+    #     username=updated_user.username,
+    #     email=updated_user.email,
+    #     avatar=updated_user.avatar,
+    #     detail="User successfully created"
+    # )
+    return user

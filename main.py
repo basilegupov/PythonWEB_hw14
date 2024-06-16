@@ -73,3 +73,5 @@ async def healthchecker(db: AsyncSession = Depends(get_db)):
         print(e)
         # logger.error(e)
         raise HTTPException(status_code=500, detail="Error connecting to the database")
+
+# uvicorn main:app --host localhost --port 8000 --reload

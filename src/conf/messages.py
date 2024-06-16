@@ -1,1 +1,6 @@
-ACCOUNT_EXIST = "Account already exists!"
+ACCOUNT_EXIST = "Account already exists"
+EMAIL_NOT_CONFIRMED = "Email is not confirmed"
+INVALID_PASSWORD = "Invalid password"
+INVALID_EMAIL = "Invalid email"
+INVALID_REFRESH_TOKEN = "Invalid refresh token"
+VERIFICATION_ERROR = "Verification error"

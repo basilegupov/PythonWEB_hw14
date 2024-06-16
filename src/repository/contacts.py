@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 # from logger import logger
 from datetime import datetime  # timedelta
@@ -35,8 +35,21 @@ async def get_contacts(limit: int, offset: int, user: User, db: AsyncSession, se
             | (Contact.last_name.ilike(search))
             | (Contact.email.ilike(search))
         )
-    contacts = await db.execute(stmt)
-    return contacts.scalars().all()
+    result = await db.execute(stmt)
+    contacts = [ContactResponse(
+        id=contact.id,
+        first_name=contact.first_name,
+        last_name=contact.last_name,
+        email=contact.email,
+        phone_number=contact.phone_number,
+        birthday=contact.birthday,
+        additional_data=contact.additional_data,
+        created_at=contact.created_at,
+        updated_at=contact.updated_at,
+        user=contact.user
+    ) for contact in result]
+
+    return contacts
 
 
 async def get_contact(contact_id: int, user: User, db: AsyncSession) -> Optional[Contact]:
@@ -157,7 +170,8 @@ async def get_upcoming_birthdays(user: User, db: AsyncSession):
     # )
     stmt = select(Contact).filter(Contact.user_id == user.id)
     contacts = await db.execute(stmt)
-    birthdays = contacts.scalars().all()
+    # birthdays = contacts
+    # birthdays = contacts.scalars().all()
     upcoming_birthdays = [ContactResponse(
         id=contact.id,
         first_name=contact.first_name,
@@ -169,7 +183,7 @@ async def get_upcoming_birthdays(user: User, db: AsyncSession):
         created_at=contact.created_at,
         updated_at=contact.updated_at,
         user=contact.user
-    ) for contact in birthdays if days_to_birthday(str(contact.birthday)) <= 7]
-    for contact in upcoming_birthdays:
-        print(days_to_birthday(str(contact.birthday)))
+    ) for contact in contacts if days_to_birthday(str(contact.birthday)) <= 7]
+    # for contact in upcoming_birthdays:
+    #     print(days_to_birthday(str(contact.birthday)))
     return upcoming_birthdays

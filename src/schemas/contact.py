@@ -48,7 +48,6 @@ class ContactUpdateSchema(ContactSchema):
     additional_data: Optional[str] = None
 
 
-
 class ContactResponse(ContactSchema):
     """
     Schema for representing a contact response.
@@ -69,4 +68,4 @@ class ContactResponse(ContactSchema):
     created_at: datetime | None
     updated_at: datetime | None
     user: UserResponse | None
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)
