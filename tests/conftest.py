@@ -11,7 +11,7 @@ from src.entity.models import Base, User
 from src.database.db import get_db
 from src.services.auth import auth_service
 
-SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./test_db"
 
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool
